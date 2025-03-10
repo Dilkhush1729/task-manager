@@ -369,7 +369,7 @@ function renderTasks() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         filteredTasks = filteredTasks.filter(task => {
-            if (!task.dueDate || task.completed ) return false;
+            if (!task.dueDate || task.completed) return false;
             const dueDate = new Date(task.dueDate);
             return dueDate > today;
         });
@@ -447,7 +447,7 @@ function renderTasks() {
                 </div>
             `;
         }
-         else {
+        else {
             // List view
             taskCard.innerHTML = `
                 <div class="task-checkbox ${task.completed ? 'checked' : ''}" data-id="${task.id}">
@@ -910,7 +910,7 @@ function sortTasks(tasks, sortBy) {
             case 'name-asc':
                 return (a.name || "").localeCompare(b.name || "");
             case 'name-desc':
-                return (b.name || "" ).localeCompare(a.name || "");
+                return (b.name || "").localeCompare(a.name || "");
             default:
                 return new Date(b.createdAt) - new Date(a.createdAt);
         }
@@ -923,6 +923,56 @@ function checkTheme() {
         document.body.classList.add('dark');
         themeSwitch.checked = true;
     }
+}
+
+// keyboard shortcuts 
+document.addEventListener("keydown", (event) => {
+    if (event.ctrlKey && event.key === "c") {
+        event.preventDefault()
+        document.getElementById("create-task-button").click();
+    } else if (event.ctrlKey && event.key === "f") {
+        event.preventDefault()
+        document.getElementById("search-input").focus();
+    }
+})
+
+// Due date alerts 
+function dueDateAlerts() {
+    let tasks = JSON.parse(localStorage.getItem('tasks'));
+    let now = new Date().getTime();
+    tasks.forEach((task) => {
+        let dueTime = new Date(task.dueDate).getTime();
+        if (dueTime - now <= 3600000 && !task.alertSent) {
+            sendNotification(`Task Due Soon: ${task.title}`);
+            task.alertSent = true;
+        }
+    })
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+}
+
+setInterval(dueDateAlerts, 60000) // every 1 minute
+
+
+const settingsButton = document.getElementById('settings-button');
+const closeSettingsButton = document.getElementById('close-settings');
+const settingsOffcanvas = document.getElementById('settings-offcanvas');
+const settingsOverlay = document.getElementById('settings-overlay');
+
+// Toggle settings offcanvas
+settingsButton.addEventListener('click', () => {
+    settingsOffcanvas.classList.add('active');
+    settingsOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+});
+
+// Close settings offcanvas
+closeSettingsButton.addEventListener('click', closeSettings);
+settingsOverlay.addEventListener('click', closeSettings);
+
+function closeSettings() {
+    settingsOffcanvas.classList.remove('active');
+    settingsOverlay.classList.remove('active');
+    document.body.style.overflow = '';
 }
 
 // Initialize the app

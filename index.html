@@ -87,13 +87,13 @@
                 </div>
 
                 <!-- Theme Toggle -->
-                <div class="theme-toggle">
+                <!-- <div class="theme-toggle">
                     <span class="theme-label">Dark Mode</span>
                     <label class="switch">
                         <input type="checkbox" id="theme-switch">
                         <span class="slider round"></span>
                     </label>
-                </div>
+                </div> -->
             </aside>
 
             <!-- Task Content -->
@@ -271,8 +271,118 @@
         </div>
     </div>
 
+<!-- Settings Offcanvas -->
+    <div class="settings-overlay" id="settings-overlay"></div>
+    <div class="settings-offcanvas" id="settings-offcanvas">
+        <div class="offcanvas-header">
+            <h2>Settings</h2>
+            <button class="close-button" id="close-settings" aria-label="Close settings">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="offcanvas-content">
+            <!-- Import/Export Task -->
+            <div class="settings-section">
+                <h3>Import / Export Task</h3>
+                <div class="settings-buttons">
+                    <button class="settings-action-button">
+                        <i class="fas fa-file-import"></i>
+                        Import Tasks
+                    </button>
+                    <button class="settings-action-button">
+                        <i class="fas fa-file-export"></i>
+                        Export Tasks
+                    </button>
+                </div>
+            </div>
+
+            <!-- Due Date Task Alerts -->
+            <div class="settings-section">
+                <h3>Due Date Task Alerts</h3>
+                <div class="settings-option">
+                    <div class="option-label">
+                        <span>Enable due date alerts</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="settings-input-group">
+                    <label for="alert-days">Alert me days before due date</label>
+                    <input type="number" id="alert-days" min="1" max="30" value="3">
+                </div>
+            </div>
+
+            <!-- Auto-Delete Tasks -->
+            <div class="settings-section">
+                <h3>Auto-Delete Tasks Older than X Months</h3>
+                <div class="settings-option">
+                    <div class="option-label">
+                        <span>Enable auto-delete for old tasks</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="settings-input-group">
+                    <label for="delete-months">Delete tasks older than (months)</label>
+                    <input type="number" id="delete-months" min="1" max="60" value="6">
+                </div>
+            </div>
+
+            <!-- Receive Notifications -->
+            <div class="settings-section">
+                <h3>Notifications</h3>
+                <div class="settings-option">
+                    <div class="option-label">
+                        <span>Receive notifications</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="settings-option sub-option">
+                    <div class="option-label">
+                        <span>Email notifications</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="settings-option sub-option">
+                    <div class="option-label">
+                        <span>Push notifications</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Theme Toggle -->
+            <div class="settings-section">
+                <h3>Theme</h3>
+                <div class="theme-toggle">
+                    <span class="theme-label">Dark Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="theme-switch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    
+
     <div class="overlay" id="overlay"></div>
 
     <script src="./app.js"></script>
 </body>
+
 </html>
