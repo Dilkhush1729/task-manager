@@ -975,5 +975,75 @@ function closeSettings() {
     document.body.style.overflow = '';
 }
 
+// Export tasks
+
+document.getElementById("exportTasks").addEventListener("click", () => {
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    if (tasks.length === 0) {
+        alert("No tasks available to export.");
+        return;
+    }
+
+    // Define CSV headers
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "ID,Name,Description,Due Date,Due Time,Category,Priority,Completed,Created At\n"; 
+
+    // Convert each task object into a CSV row
+    tasks.forEach(task => {
+        let row = `${task.id},"${task.name}","${task.description.replace(/\n/g, " ")}",${task.dueDate},${task.dueTime},${task.category},${task.priority},${task.completed},${task.createdAt}`;
+        csvContent += row + "\n";
+    });
+
+    // Create a downloadable CSV file
+    let encodedUri = encodeURI(csvContent);
+    let link = document.createElement("a");
+    link.href = encodedUri;
+    link.download = "tasks.csv";
+    link.click();
+});
+
+// Import tasks
+document.getElementById("importTasks").addEventListener("change", (event) => {
+    let file = event.target.files[0];
+
+    if (file) {
+        let reader = new FileReader();
+        reader.onload = (e) => {
+            let csvData = e.target.result.split("\n").slice(1); // Skip header row
+            let importedTasks = [];
+
+            csvData.forEach(row => {
+                let columns = row.split(",");
+
+                if (columns.length >= 9) { // Ensure the row has enough data
+                    let task = {
+                        id: columns[0].trim(),
+                        name: columns[1].trim().replace(/"/g, ""), // Remove quotes
+                        description: columns[2].trim().replace(/"/g, ""),
+                        dueDate: columns[3].trim(),
+                        dueTime: columns[4].trim(),
+                        category: columns[5].trim(),
+                        priority: columns[6].trim(),
+                        completed: columns[7].trim().toLowerCase() === "true", // Convert to boolean
+                        createdAt: columns[8].trim()
+                    };
+                    importedTasks.push(task);
+                }
+            });
+
+            // Save imported tasks to localStorage
+            let existingTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            localStorage.setItem("tasks", JSON.stringify([...existingTasks, ...importedTasks]));
+
+            alert("Tasks imported successfully!");
+            location.reload(); // Refresh page to reflect changes
+        };
+
+        reader.readAsText(file);
+    }
+});
+
+
 // Initialize the app
 init();
