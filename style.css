@@ -894,7 +894,7 @@ textarea {
     .sidebar {
         position: fixed;
         z-index: 100;
-        transform: translateX(-100%);
+        /* transform: translateX(-100%); */
     }
     
     .sidebar.active {
