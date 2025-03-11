@@ -1044,6 +1044,64 @@ document.getElementById("importTasks").addEventListener("change", (event) => {
     }
 });
 
+// Import categories 
+
+document.getElementById("importCategories").addEventListener("change", (event) => {
+    let file = event.target.files[0];
+
+    if (file) {
+        let reader = new FileReader();
+        reader.onload = (e) => {
+            let csvData = e.target.result.split("\n").slice(1); // Skip header row
+            let importedCategories = [];
+
+            csvData.forEach(row => {
+                let columns = row.split(",");
+
+                if (columns.length >= 3) { // Ensure the row has enough data
+                    let category = {
+                        id: columns[0].trim(),
+                        name: columns[1].trim().replace(/"/g, ""), // Remove quotes
+                        color: columns[2].trim().replace(/"/g, "")
+                    };
+                    importedCategories.push(category);
+                }
+            });
+
+            // Save imported categories to localStorage
+            let existingCategories = JSON.parse(localStorage.getItem("categories")) || [];
+            localStorage.setItem("categories", JSON.stringify([...existingCategories, ...importedCategories]));
+
+            alert("Categories imported successfully!");
+            location.reload(); // Refresh page to reflect changes
+        };
+
+        reader.readAsText(file);
+    }
+});
+
+// Export categories 
+document.getElementById("exportCategories").addEventListener("click", () => {
+    let categories = JSON.parse(localStorage.getItem("categories")) || [];
+
+    if (categories.length === 0) {
+        alert("No categories to export.");
+        return;
+    }
+
+    let csvContent = "ID,Name,Color\n"; // CSV Header
+    categories.forEach(category => {
+        csvContent += `${category.id},"${category.name}","${category.color}"\n`;
+    });
+
+    let blob = new Blob([csvContent], { type: "text/csv" });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "categories.csv";
+    link.click();
+});
+
+
 
 // Initialize the app
 init();

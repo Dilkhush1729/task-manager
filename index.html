@@ -295,6 +295,12 @@
                 </div>
             </div>
 
+            <!-- Import/Export Category -->
+            <div class="category-actions">
+                <button id="exportCategories" class="btn">Export Categories (CSV)</button>
+                <input type="file" id="importCategories" accept=".csv" hidden>
+                <button onclick="document.getElementById('importCategories').click()" class="btn">Import Categories (CSV)</button>
+            </div>
             <!-- Due Date Task Alerts -->
             <div class="settings-section">
                 <h3>Due Date Task Alerts</h3>
