@@ -913,6 +913,9 @@ textarea {
     .modal {
         width: 90%;
     }
+    .settings-offcanvas{
+        width: 100%;
+    }
 }
 
 /* Empty State */
