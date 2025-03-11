@@ -927,7 +927,7 @@ function checkTheme() {
 
 // keyboard shortcuts 
 document.addEventListener("keydown", (event) => {
-    if (event.ctrlKey && event.key === "c") {
+    if (event.ctrlKey && event.key === "k") {
         event.preventDefault()
         document.getElementById("create-task-button").click();
     } else if (event.ctrlKey && event.key === "f") {
