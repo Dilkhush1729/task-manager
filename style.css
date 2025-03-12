@@ -915,7 +915,10 @@ textarea {
     }
     .settings-offcanvas{
         width: 100% !important;
-        right: -100% !important;
+        right: 100% !important;
+    }
+    .settings-offcanvas.active {
+        right: 0 !important;
     }
 }
 
