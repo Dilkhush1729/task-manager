@@ -543,14 +543,12 @@ function renderEmptyState() {
             <p class="empty-state-description">
                 ${searchInput.value ? 'Try a different search term or' : 'Get started by'} creating a new task.
             </p>
-            <button class="empty-state-button" id="empty-state-create-button">
+            <button class="empty-state-button" id="empty-state-create-button" onclick="openTaskModal()">
                 <i class="fas fa-plus"></i>
                 <span>Create Task</span>
             </button>
         </div>
     `;
-
-    document.getElementById('empty-state-create-button').addEventListener('click', openTaskModal);
 }
 
 function renderCategories() {
@@ -662,7 +660,7 @@ function updateCounts() {
 }
 
 // Modal Functions
-function openTaskModal(taskId = !null) {
+function openTaskModal(taskId = null) {
     console.log("rana")
     currentTaskId = taskId;
     const modalTitle = document.getElementById('modal-title');
