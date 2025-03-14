@@ -218,8 +218,8 @@
                         <input type="hidden" id="category-color" value="#4f46e5">
                     </div>
                     <div class="form-actions">
-                        <!-- <button type="button" id="delete-category" class="delete-button">Delete</button> -->
-                        <button type="submit" class="save-button">Save Category</button>
+                        <button type="button" id="delete-category" class="delete-button">Delete</button>
+                        <button type="submit" class="save-button" id="save-category">Save Category</button>
                     </div>
                 </form>
             </div>
@@ -386,6 +386,17 @@
     
 
     <div class="overlay" id="overlay"></div>
+
+    <div id="notification-container"></div>
+
+    <!-- Delete Modal Structure -->
+    <div id="confirmationModal">
+        <div class="delete-modal-content">
+            <p>Are you sure you want to delete this category?</p>
+            <button id="confirm-btn">Yes, Delete</button>
+            <button id="cancel-btn">Cancel</button>
+        </div>
+    </div>
 
     <script src="./app.js"></script>
 </body>
