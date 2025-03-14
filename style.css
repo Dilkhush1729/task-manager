@@ -485,8 +485,13 @@ input:checked + .slider:before {
 
 .task-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 1rem;
+}
+.task-grid.single-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .task-grid.list-view {
@@ -1143,7 +1148,6 @@ textarea {
     position: fixed;
     top: 80px;
     right: 15px;
-    width: 300px;
     max-height: 400px;
     overflow-y: auto;
 }
@@ -1177,7 +1181,7 @@ textarea {
 }
 
 .delete-modal-content {
-    background: white;
+    background: var(--bg-secondary);
     padding: 20px;
     border-radius: 8px;
     text-align: center;
