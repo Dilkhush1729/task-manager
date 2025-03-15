@@ -1546,7 +1546,7 @@ textarea {
 }
 
 .priority-low {
-    background-color: var(--primary);
+    background-color: var(--secondary);
     border: 1px solid white;
 }
 
@@ -1612,11 +1612,13 @@ textarea {
 .event-status.completed {
     background-color: #10b981;
     color: white;
+    border: 1px solid white;
 }
 
 .event-status.pending {
     background-color: #f59e0b;
     color: white;
+    border: 1px solid white;
 }
 
 .event-close-button {

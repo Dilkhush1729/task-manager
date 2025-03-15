@@ -1393,13 +1393,15 @@ function openCalendar (){
         const taskDate = new Date(task.dueDate);
         const dateOptions = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
         const formattedDate = taskDate.toLocaleDateString('en-US', dateOptions);
-
+        const category = categories.find(cat => cat.id === task.category);
+        const categoryText = category ? category.name : 'Task Category not Assigned. Please Edit the task to assign a category.';
         // Create content
         eventPopupContent.innerHTML = `
         <h3 class="event-title">${task.name}</h3>
         <div class="event-status ${task.completed ? 'completed' : 'pending'}">
           ${task.completed ? 'Completed' : 'Pending'}
         </div>
+        <div class="event-detail">Category : ${categoryText}</div>
         <div class="event-detail">
           <svg class="event-detail-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
