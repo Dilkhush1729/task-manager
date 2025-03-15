@@ -1146,15 +1146,16 @@ textarea {
 
 #notification-container {
     position: fixed;
-    top: 80px;
-    right: 15px;
+    top: 1.5%;
+    right: 30%;
     max-height: 400px;
     overflow-y: auto;
+    z-index: 100;
 }
 
 .notification {
     background: var(--primary);
-    color: #fff;
+    color: var(--bg-secondary);
     padding: 10px;
     margin: 5px;
     border-radius: 5px;

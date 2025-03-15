@@ -259,7 +259,7 @@ function addTask(task) {
         completed: false,
         createdAt: new Date().toISOString()
     });
-    triggerNotification("task saved successfully")
+    triggerNotification("🎉 Task saved successfully! One step closer to achieving your goals! 🚀");
     saveTasksToLocalStorage();
     renderTasks();
     updateCounts();
@@ -277,7 +277,7 @@ function updateTask(id, updatedTask) {
             category: updatedTask.category,
             priority: updatedTask.priority
         };
-        triggerNotification("task updated successfully");
+        triggerNotification("🔄 Task updated successfully! Keep up the momentum! 🚀");
         saveTasksToLocalStorage();
         renderTasks();
         updateCounts();
@@ -286,7 +286,7 @@ function updateTask(id, updatedTask) {
 
 function deleteTask(id) {
     tasks = tasks.filter(task => task.id !== id);
-    triggerNotification("task deleted successfully")
+    triggerNotification("✅ Task deleted successfully! Stay focused on what matters! 🚀");
     saveTasksToLocalStorage();
     renderTasks();
     updateCounts();
@@ -319,7 +319,7 @@ function addCategory(category) {
         name: category.name,
         color: category.color
     });
-    triggerNotification(`Category added successfully`);
+    triggerNotification("✅ Category has been added successfully!");
     saveCategoriesToLocalStorage();
     renderCategories();
 }
@@ -332,7 +332,7 @@ function updateCategory(id, updatedCategory) {
             name: updatedCategory.name,
             color: updatedCategory.color
         };
-        triggerNotification("Category updated successfully");
+        triggerNotification("🔄 Category updated successfully! Keep everything organized! 📂");
         saveCategoriesToLocalStorage();
         renderCategories();
         renderTasks(); // Re-render tasks to update category colors
@@ -354,7 +354,7 @@ function deleteCategory(id) {
     saveCategoriesToLocalStorage();
     
     renderCategories();
-    triggerNotification("Category deleted Successfully");
+    triggerNotification("🎯 Category deleted successfully! Time for a fresh start! 🚀");
     renderTasks();
 }
 
@@ -497,12 +497,20 @@ function renderTasks() {
             e.stopPropagation(); // Prevent opening details
             const taskId = checkbox.dataset.id;
             const taskIndex = tasks.findIndex(t => t.id === taskId);
+            const isNowCompleted = !tasks[taskIndex].completed;
+
             if (taskIndex !== -1) {
                 tasks[taskIndex].completed = !tasks[taskIndex].completed;
-                triggerNotification("Congratulations you have completed your task");
                 saveTasksToLocalStorage();
                 renderTasks();
                 updateCounts();
+            }
+
+            if (isNowCompleted) {
+                triggerNotification("🎉 Congratulations! You have completed your task.");
+            }
+            else if(!isNowCompleted){
+                triggerNotification("😔 Oops! You have undone your task.");
             }
         });
     });
@@ -988,7 +996,7 @@ function dueDateAlerts() {
     tasks.forEach((task) => {
         let dueTime = new Date(task.dueDate).getTime();
         if (dueTime - now <= 3600000 && !task.alertSent) {
-            triggerNotification(`Task Due Soon: ${task.title}`);
+            triggerNotification(`⚠️ Reminder: "${task.title}" is due soon! Stay on track! ⏰`);
             task.alertSent = true;
         }
     })
@@ -1084,7 +1092,7 @@ document.getElementById("importTasks").addEventListener("change", (event) => {
             alert("Tasks imported successfully!");
 
             location.reload(); // Refresh page to reflect changes
-            triggerNotification("Tasks imported successfully!");
+            triggerNotification("✅ Tasks imported successfully!");
         };
 
         reader.readAsText(file);
@@ -1121,7 +1129,7 @@ document.getElementById("importCategories").addEventListener("change", (event) =
 
             alert("Categories imported successfully!");
             location.reload(); // Refresh page to reflect changes
-            triggerNotification("Categories imported successfully!");
+            triggerNotification("✅ Categories imported successfully!");
         };
 
         reader.readAsText(file);
@@ -1152,11 +1160,10 @@ document.getElementById("exportCategories").addEventListener("click", () => {
 // push notification 
 let notificationDisplayed = false;
 function triggerNotification(message) {
-
+    // Remove Duplicate Notifications
     if (notificationDisplayed) {
-        return; // Exit the function if a notification is already shown
+        return;
     }
-
     notificationDisplayed = true;
     const notification = document.createElement("div");
     notification.classList.add("notification");
