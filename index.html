@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Header -->
@@ -22,6 +24,11 @@
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" id="search-input" placeholder="Search tasks">
+                </div>
+                <div>
+                    <button id="calendar-view-enable" class="icon-button" title="Access Your All Task in Calendar View">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </button>
                 </div>
                 <button id="settings-button" class="icon-button">
                     <i class="fas fa-cog"></i>
@@ -45,15 +52,15 @@
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">Views</h3>
                     <ul class="sidebar-list">
-                        <li class="sidebar-item" data-view="today">
-                            <i class="fas fa-calendar-day"></i>
-                            <span>Today</span>
-                            <span class="task-count" id="today-count">0</span>
-                        </li>
                         <li class="sidebar-item active" data-view="all">
                             <i class="fas fa-tasks"></i>
                             <span>All Tasks</span>
                             <span class="task-count" id="all-count">0</span>
+                        </li>
+                        <li class="sidebar-item" data-view="today">
+                            <i class="fas fa-calendar-day"></i>
+                            <span>Today</span>
+                            <span class="task-count" id="today-count">0</span>
                         </li>
                         <li class="sidebar-item" data-view="upcoming">
                             <i class="fas fa-calendar-alt"></i>
@@ -88,7 +95,7 @@
             </aside>
 
             <!-- Task Content -->
-            <div class="task-content">
+            <div class="task-content" id="calendar-grid">
                 <div class="task-header">
                     <h2 id="current-view-title">All Tasks</h2>
                     <div class="task-actions">
@@ -115,7 +122,7 @@
                     </div>
                 </div>
 
-                <!-- Task Grid -->
+                <!-- Task Grid & calendar view -->
                 <div class="task-grid" id="task-container">
                     <!-- Tasks will be added dynamically -->
                 </div>
@@ -262,7 +269,7 @@
         </div>
     </div>
 
-<!-- Settings Offcanvas -->
+    <!-- Settings Offcanvas -->
     <div class="settings-overlay" id="settings-overlay"></div>
     <div class="settings-offcanvas" id="settings-offcanvas">
         <div class="offcanvas-header">
@@ -290,7 +297,8 @@
             <div class="category-actions">
                 <button id="exportCategories" class="btn">Export Categories (CSV)</button>
                 <input type="file" id="importCategories" accept=".csv" hidden>
-                <button onclick="document.getElementById('importCategories').click()" class="btn">Import Categories (CSV)</button>
+                <button onclick="document.getElementById('importCategories').click()" class="btn">Import Categories
+                    (CSV)</button>
             </div>
 
             <!-- Auto-Delete Tasks -->
@@ -325,7 +333,7 @@
         </div>
     </div>
     </div>
-    
+
 
     <div class="overlay" id="overlay"></div>
 

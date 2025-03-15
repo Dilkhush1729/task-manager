@@ -31,7 +31,8 @@ const dropdownButton = document.querySelector('.dropdown-button');
 const dropdownContent = document.querySelector('.dropdown-content');
 const sortOptions = document.querySelectorAll('.dropdown-content a');
 const deleteConfirmationModal = document.getElementById("confirmationModal");
-
+const taskContentContainer = document.getElementById('calendar-grid');
+const enableCalendarView = document.getElementById('calendar-view-enable');
 deleteConfirmationModal.style.display = "none";
 
 // State
@@ -42,6 +43,8 @@ let currentSort = 'date-desc';
 let currentTaskId = null;
 let currentCategoryId = null;
 let isGridView = true;
+let isListView = false;
+let isCalendarView = false;
 
 // Initialize
 function init() {
@@ -122,19 +125,41 @@ function setupEventListeners() {
     // Grid/List View Toggle
     gridViewButton.addEventListener('click', () => {
         isGridView = true;
+        isListView = false;
+        isCalendarView = false;
         gridViewButton.classList.add('active');
         listViewButton.classList.remove('active');
         taskContainer.classList.remove('list-view');
+        taskContainer.classList.remove('grid-view');
+        enableCalendarView.classList.remove('active');
         localStorage.setItem('viewMode', 'grid');
+        window.location.reload();
     });
 
     listViewButton.addEventListener('click', () => {
+        isListView = true;
         isGridView = false;
+        isCalendarView = false;
         listViewButton.classList.add('active');
         gridViewButton.classList.remove('active');
+        enableCalendarView.classList.remove('active');
         taskContainer.classList.add('list-view');
         localStorage.setItem('viewMode', 'list');
+        window.location.reload();
     });
+
+    enableCalendarView.addEventListener('click', (e) => {
+        e.preventDefault();
+        isGridView = false;
+        isListView = false;
+        isCalendarView = true;
+        enableCalendarView.classList.add('active');
+        listViewButton.classList.remove('active');
+        gridViewButton.classList.remove('active');
+        localStorage.setItem('viewMode', 'calendar');
+        openCalendar();
+
+    })
 
     // Edit Task
     editTaskButton.addEventListener('click', () => {
@@ -162,11 +187,12 @@ function setupEventListeners() {
     });
 
     // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.dropdown')) {
-            document.querySelector('.dropdown').classList.remove('active');
-        }
-    });
+    // document.addEventListener('click', (e) => {
+    //     const dropdown = document.querySelector('.dropdown');
+    //     if (!e.target.closest('.dropdown')) {
+    //         dropdown.classList.remove('active');
+    //     }
+    // });
 }
 
 // Local Storage
@@ -212,6 +238,7 @@ function loadFromLocalStorage() {
     const viewMode = localStorage.getItem('viewMode');
     if (viewMode === 'list') {
         isGridView = false;
+        isCalendarView = false;
         listViewButton.classList.add('active');
         gridViewButton.classList.remove('active');
         taskContainer.classList.add('list-view');
@@ -221,20 +248,6 @@ function loadFromLocalStorage() {
     const savedSort = localStorage.getItem('currentSort');
     if (savedSort) {
         currentSort = savedSort;
-    }
-
-    // Load Current View
-    const savedView = localStorage.getItem('currentView');
-    if (savedView) {
-        currentView = savedView;
-        viewButtons.forEach(btn => {
-            if (btn.dataset.view === currentView) {
-                btn.classList.add('active');
-                currentViewTitle.textContent = btn.querySelector('span').textContent;
-            } else {
-                btn.classList.remove('active');
-            }
-        });
     }
 }
 
@@ -299,7 +312,7 @@ function toggleTaskCompletion() {
         saveTasksToLocalStorage();
         renderTasks();
         updateCounts();
-        
+
         // Update button text
         if (tasks[index].completed) {
             completeTaskButton.innerHTML = '<i class="fas fa-undo"></i><span>Mark as Incomplete</span>';
@@ -348,11 +361,11 @@ function deleteCategory(id) {
         return task;
     });
     saveTasksToLocalStorage();
-    
+
     // Delete the category
     categories = categories.filter(category => category.id !== id);
     saveCategoriesToLocalStorage();
-    
+
     renderCategories();
     triggerNotification("🎯 Category deleted successfully! Time for a fresh start! 🚀");
     renderTasks();
@@ -361,7 +374,7 @@ function deleteCategory(id) {
 // Render Functions
 function renderTasks() {
     taskContainer.innerHTML = '';
-    
+
     // Filter tasks based on current view and search
     let filteredTasks = tasks;
     const searchTerm = searchInput.value.toLowerCase();
@@ -384,30 +397,26 @@ function renderTasks() {
         const categoryId = currentView.replace('category-', '');
         filteredTasks = filteredTasks.filter(task => task.category === categoryId);
     }
-    
+
     // Apply search filter
     if (searchTerm) {
         filteredTasks = filteredTasks.filter(task => {
-            console.log("Task:", task); // Debugging
-            console.log("Task Name:", task.name); // Should not be undefined
-            console.log("Task Description:", task.description); // Should not be undefined
-    
             return (
                 (task.name && task.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (task.description && task.description.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         });
-    }    
-    
+    }
+
     // Sort tasks
     filteredTasks = sortTasks(filteredTasks, currentSort);
-    
+
     // Check if there are no tasks
     if (filteredTasks.length === 0) {
         renderEmptyState();
         return;
     }
-    
+
     // Render each task
     filteredTasks.forEach(task => {
         const taskCard = document.createElement('div');
@@ -422,7 +431,7 @@ function renderTasks() {
             const now = new Date(); // Get the current date and time
             const taskDueDate = task.dueDate && task.dueTime ? new Date(task.dueDate + ' ' + task.dueTime) : null;
             const isOverdue = taskDueDate < now && !task.completed;
-            
+
             taskCard.innerHTML = `
                 <div class="task-header-row">
                     <h3 class="task-title">${task.name}</h3>
@@ -452,7 +461,7 @@ function renderTasks() {
                 </div>
             `;
         }
-        else {
+        else{
             // List view
             taskCard.innerHTML = `
                 <div class="task-checkbox ${task.completed ? 'checked' : ''}" data-id="${task.id}">
@@ -509,14 +518,14 @@ function renderTasks() {
             if (isNowCompleted) {
                 triggerNotification("🎉 Congratulations! You have completed your task.");
             }
-            else if(!isNowCompleted){
+            else if (!isNowCompleted) {
                 triggerNotification("😔 Oops! You have undone your task.");
             }
         });
     });
 }
 function renderEmptyState() {
-    
+
 
     let message = '';
     let icon = 'fas fa-tasks';
@@ -587,7 +596,6 @@ function renderCategories() {
                 color
             };
             openCategoryModal(categoryId);
-            console.log("category data :", categoryData)
         })
         // Add event listener for category selection
         li.addEventListener('click', (event) => {
@@ -611,7 +619,6 @@ function renderCategories() {
             document.getElementById('cancel-btn').addEventListener('click', (event) => {
                 event.preventDefault();
                 deleteConfirmationModal.style.display = "none";
-                console.log("delete", deleteConfirmationModal)
             })
 
             document.getElementById('confirm-btn').addEventListener('click', (e) => {
@@ -669,7 +676,6 @@ function updateCounts() {
 
 // Modal Functions
 function openTaskModal(taskId = null) {
-    console.log("rana")
     currentTaskId = taskId;
     const modalTitle = document.getElementById('modal-title');
     const taskNameInput = document.getElementById('task-name');
@@ -682,10 +688,8 @@ function openTaskModal(taskId = null) {
 
     // Reset form
     taskForm.reset();
-    console.log('task is :', taskId)
     if (taskId) {
         // Edit mode
-        console.log("rana 2")
 
         modalTitle.textContent = 'Edit Task';
         deleteTaskButton.style.display = 'block';
@@ -702,7 +706,6 @@ function openTaskModal(taskId = null) {
         }
     } else {
         // Create mode
-        console.log("rana 3")
 
         modalTitle.textContent = 'Create New Task';
         deleteTaskButton.style.display = 'none';
@@ -736,7 +739,6 @@ function openCategoryModal(categoryId = null) {
     colorOptions.forEach(option => option.classList.remove('selected'));
     colorOptions[0].classList.add('selected');
     categoryColorInput.value = colorOptions[0].dataset.color;
-    console.log("red bro", categoryId)
     deleteCategoryButton.style.display = 'none';
 
     if (categoryId) {
@@ -748,10 +750,7 @@ function openCategoryModal(categoryId = null) {
         deleteCategoryButton.style.display = 'block';
         saveButton.textContent = "Update Category";
 
-        console.log("saev ...", saveButton)
-
         const category = categories.find(category => category.id === categoryId);
-        console.log('sgfgsdf')
         if (category) {
             categoryNameInput.value = category.name;
             categoryColorInput.value = category.color;
@@ -767,9 +766,9 @@ function openCategoryModal(categoryId = null) {
             });
 
         }
-    } 
+    }
     else {
-        
+
         modalTitle.textContent = 'Add Category';
 
         categoryIdInput.value = '';
@@ -1162,6 +1161,394 @@ function triggerNotification(message) {
             notificationDisplayed = false;
         }, 0);
     }, 3000);
+}
+
+// calander imports code added
+
+function openCalendar (){
+    taskContainer.innerHTML = '';
+    taskContainer.style.background = 'rgba(255, 255, 255, 0.2);';
+    taskContainer.innerHTML =
+        `<div class="calendar-module-container">
+            <!-- Calendar View -->
+            <div class="calendar-view">
+            <!-- Calendar Controls -->
+            <div class="calendar-controls">
+                <div class="flex items-center gap-4">
+                <button class="today-button" id="todayButton">Today</button>
+                <div class="flex">
+                    <button class="nav-button nav-button-left" id="prevButton">
+                    <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    </button>
+                    <button class="nav-button nav-button-right" id="nextButton">
+                    <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    </button>
+                </div>
+                <h2 class="current-date" id="currentDate">March 15</h2>
+                </div>
+
+                <div class="view-selector">
+                <button class="view-button" data-view="day">Day</button>
+                <button class="view-button active" data-view="week">Week</button>
+                <button class="view-button" data-view="month">Month</button>
+                </div>
+            </div>
+
+            <!-- Week View -->
+            <div class="calendar-container">
+                <div class="calendar-inner">
+                <!-- Week Header -->
+                <div class="week-header" id="weekHeader">
+                    <div class="time-column-header"></div>
+                    <!-- Day headers will be inserted by JavaScript -->
+                </div>
+
+                <!-- Time Grid -->
+                <div class="time-grid">
+                    <!-- Time Labels -->
+                    <div class="time-labels" id="timeLabels">
+                    <!-- Time slots will be inserted by JavaScript -->
+                    </div>
+
+                    <!-- Days Columns -->
+                    <div class="days-columns" id="daysColumns">
+                    <!-- Day columns will be inserted by JavaScript -->
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Event Details Popup -->
+    <div class="event-popup" id="eventPopup">
+      <div class="event-popup-content" id="eventPopupContent">
+        <!-- Event details will be inserted by JavaScript -->
+      </div>
+    </div>
+   </div>`
+
+    // Get tasks from localStorage
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    // Initialize variables
+    let currentView = 'week';
+    let currentDate = new Date();
+    let selectedTask = null;
+
+    // Initialize the calendar
+    function initCalendar() {
+        updateCurrentDateDisplay();
+        initWeekView();
+        addEventListeners();
+    }
+
+    // Update current date display
+    function updateCurrentDateDisplay() {
+        const options = { month: 'long', day: 'numeric' };
+        const newDate = document.getElementById('currentDate')
+        if (options && newDate) {
+            newDate.textContent = currentDate.toLocaleString('default', options);
+        }
+    }
+
+    // Initialize week view
+    function initWeekView() {
+        // Clear existing content
+        document.getElementById('weekHeader').innerHTML = '<div class="time-column-header"></div>';
+        document.getElementById('timeLabels').innerHTML = '';
+        document.getElementById('daysColumns').innerHTML = '';
+
+        // Get start of week (Sunday)
+        const startOfWeek = new Date(currentDate);
+        startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+
+        // Add week header days
+        const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+        const weekHeader = document.getElementById('weekHeader');
+
+        for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(startOfWeek);
+            dayDate.setDate(startOfWeek.getDate() + i);
+
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'day-header';
+
+            const dayName = document.createElement('div');
+            dayName.className = 'day-name';
+            dayName.textContent = weekDays[i];
+
+            const dayNumber = document.createElement('div');
+            const isCurrentDay = isSameDay(dayDate, new Date());
+            dayNumber.className = isCurrentDay ? 'day-number current' : 'day-number';
+            dayNumber.textContent = dayDate.getDate();
+
+            dayHeader.appendChild(dayName);
+            dayHeader.appendChild(dayNumber);
+            weekHeader.appendChild(dayHeader);
+        }
+
+        // Add time labels (8 AM to 8 PM)
+        const timeLabels = document.getElementById('timeLabels');
+
+        for (let hour = 0; hour < 24; hour++) {
+            const timeLabel = document.createElement('div');
+            timeLabel.className = 'time-label';
+            timeLabel.textContent = formatHour(hour);
+            timeLabels.appendChild(timeLabel);
+        }
+
+        // Function to format hour correctly (12-hour format with AM/PM)
+        function formatHour(hour) {
+            if (hour === 0) return "12 AM"; // Midnight
+            if (hour === 12) return "12 PM"; // Noon
+            return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
+        }
+
+        // Add day columns
+        const daysColumns = document.getElementById('daysColumns');
+        for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+            const dayColumn = document.createElement('div');
+            dayColumn.className = 'day-column';
+
+            // Add time slots
+            for (let hour = 1; hour <= 24; hour++) {
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'time-slot';
+                dayColumn.appendChild(timeSlot);
+            }
+
+            // Get date for this column
+            const columnDate = new Date(startOfWeek);
+            columnDate.setDate(startOfWeek.getDate() + dayIndex);
+
+            // Add tasks for this day
+            const dayTasks = tasks.filter(task => {
+                const taskDate = new Date(task.dueDate);
+                return isSameDay(taskDate, columnDate);
+            });
+
+            dayTasks.forEach(task => {
+                const taskElement = createTaskElement(task);
+                dayColumn.appendChild(taskElement);
+            });
+
+            daysColumns.appendChild(dayColumn);
+        }
+    }
+
+    // Create task element
+    function createTaskElement(task) {
+        const taskElement = document.createElement('div');
+        taskElement.className = `event priority-${task.priority} ${task.completed ? 'completed' : ''}`;
+    
+        // Calculate position based on due time
+        const [hours, minutes] = task.dueTime.split(':').map(Number);
+        const timePosition = hours + minutes / 60; // Convert time to decimal hours
+    
+        taskElement.style.top = `${timePosition * 5}rem`; // 5rem per hour, starting at 12 AM
+        taskElement.style.height = '4rem'; // Fixed height for tasks
+    
+        const taskTitle = document.createElement('div');
+        taskTitle.className = 'event-title';
+        taskTitle.textContent = task.name;
+    
+        const taskTime = document.createElement('div');
+        taskTime.className = 'event-time';
+        taskTime.textContent = formatTime1(task.dueTime);
+    
+        taskElement.appendChild(taskTitle);
+        taskElement.appendChild(taskTime);
+    
+        // Add click event
+        taskElement.addEventListener('click', () => {
+            showTaskDetails(task);
+        });
+    
+        return taskElement;
+    }
+    
+    // Function to format time as AM/PM
+    function formatTime1(time) {
+        const [hour, minute] = time.split(':').map(Number);
+        const period = hour < 12 ? 'AM' : 'PM';
+        const formattedHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+        return `${formattedHour}:${minute.toString().padStart(2, '0')} ${period}`;
+    }
+    
+
+    // Show task details
+    function showTaskDetails(task) {
+        selectedTask = task;
+        const eventPopup = document.getElementById('eventPopup');
+        const eventPopupContent = document.getElementById('eventPopupContent');
+
+        // Set background color based on priority
+        eventPopupContent.className = `event-popup-content priority-${task.priority}`;
+
+        // Format date
+        const taskDate = new Date(task.dueDate);
+        const dateOptions = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+        const formattedDate = taskDate.toLocaleDateString('en-US', dateOptions);
+
+        // Create content
+        eventPopupContent.innerHTML = `
+        <h3 class="event-title">${task.name}</h3>
+        <div class="event-status ${task.completed ? 'completed' : 'pending'}">
+          ${task.completed ? 'Completed' : 'Pending'}
+        </div>
+        <div class="event-detail">
+          <svg class="event-detail-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          ${formatTime(task.dueTime)} - Due Time
+        </div>
+        <div class="event-detail">
+          <svg class="event-detail-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          ${formattedDate}
+        </div>
+        <div class="event-detail">
+          <svg class="event-detail-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+          Priority: ${capitalizeFirstLetter(task.priority)}
+        </div>
+        <p class="event-description"><strong>Description:</strong><br>${task.description || 'No description provided.'}</p>
+        <div class="event-detail">
+          <svg class="event-detail-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Created: ${new Date(task.createdAt).toLocaleString()}
+        </div>
+        <div class="event-actions">
+          <button class="event-close-button" id="closeEventPopup">Close</button>
+        </div>
+      `;
+
+        // Show popup
+        eventPopup.classList.add('show');
+
+        // Add close event
+        document.getElementById('closeEventPopup').addEventListener('click', () => {
+            eventPopup.classList.remove('show');
+            selectedTask = null;
+        });
+    }
+
+    // Add event listeners
+    function addEventListeners() {
+        // Today button
+        document.getElementById('todayButton').addEventListener('click', () => {
+            currentDate = new Date();
+            updateCurrentDateDisplay();
+            initWeekView();
+        });
+
+        // Previous button
+        document.getElementById('prevButton').addEventListener('click', () => {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() - 7);
+            } else if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            }
+            updateCurrentDateDisplay();
+            initWeekView();
+        });
+
+        // Next button
+        document.getElementById('nextButton').addEventListener('click', () => {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() + 1);
+            } else if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() + 7);
+            } else if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+            updateCurrentDateDisplay();
+            initWeekView();
+        });
+
+        // View buttons
+        document.querySelectorAll('.view-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                document.querySelectorAll('.view-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // Add active class to clicked button
+                button.classList.add('active');
+
+                // Update current view
+                currentView = button.dataset.view;
+
+                // Currently only week view is implemented
+                initWeekView();
+            });
+        });
+
+        // Listen for changes in localStorage
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'tasks') {
+                tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+                initWeekView();
+            }
+        });
+    }
+
+    // Helper function: Format hour (8 AM, 2 PM, etc.)
+    function formatHour(hour) {
+        return hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+    }
+
+    // Helper function: Format time (09:00 → 9:00 AM)
+    function formatTime(timeString) {
+        const [hours, minutes] = timeString.split(':').map(Number);
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const hour12 = hours % 12 || 12;
+        return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
+    }
+
+    // Helper function: Check if two dates are the same day
+    function isSameDay(date1, date2) {
+        return date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate();
+    }
+
+    // Helper function: Capitalize first letter
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    // Initialize the calendar
+    initCalendar();
+
+    // Expose functions to window for external access
+    window.calendarModule = {
+        refreshCalendar: function () {
+            tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            initWeekView();
+        },
+        goToDate: function (date) {
+            currentDate = new Date(date);
+            updateCurrentDateDisplay();
+            initWeekView();
+        }
+    };
 }
 
 // Initialize the app
