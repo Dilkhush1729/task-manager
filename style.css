@@ -330,7 +330,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: var(--bg-tertiary);
     border-radius: var(--radius);
 }
 
@@ -1003,7 +1002,7 @@ textarea {
     right: -40%;
     width: 40%;
     height: 100vh;
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     z-index: 30;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
     transition: var(--transition);

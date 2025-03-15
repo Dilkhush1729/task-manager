@@ -420,8 +420,8 @@ function renderTasks() {
         // Create task card content
         if (isGridView) {
             const now = new Date(); // Get the current date and time
-            const taskDueDate = task.dueDate ? new Date(task.dueDate) : null;
-            const isOverdue = taskDueDate && taskDueDate < now && !task.completed;
+            const taskDueDate = task.dueDate && task.dueTime ? new Date(task.dueDate + ' ' + task.dueTime) : null;
+            const isOverdue = taskDueDate < now && !task.completed;
             
             taskCard.innerHTML = `
                 <div class="task-header-row">
@@ -434,7 +434,7 @@ function renderTasks() {
                 <div class="task-date">
                     <i class="far fa-calendar"></i>
                     <span>${formatDate(task.dueDate)}${task.dueTime ? ' at ' + formatTime(task.dueTime) : ''}</span>
-                    ${isOverdue ? '<span class="due-tag">( Due Date Passed ) </span>' : ''}
+                    ${isOverdue ? '<span class="due-tag">( Task Is Over Due ) </span>' : ''}
                 </div>
                 ` : ''}
                 ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
@@ -988,23 +988,6 @@ document.addEventListener("keydown", (event) => {
         document.getElementById("search-input").focus();
     }
 })
-
-// Due date alerts 
-function dueDateAlerts() {
-    let tasks = JSON.parse(localStorage.getItem('tasks'));
-    let now = new Date().getTime();
-    tasks.forEach((task) => {
-        let dueTime = new Date(task.dueDate).getTime();
-        if (dueTime - now <= 3600000 && !task.alertSent) {
-            triggerNotification(`⚠️ Reminder: "${task.title}" is due soon! Stay on track! ⏰`);
-            task.alertSent = true;
-        }
-    })
-    localStorage.setItem('tasks', JSON.stringify(tasks))
-}
-
-setInterval(dueDateAlerts, 60000) // every 1 minute
-
 
 const settingsButton = document.getElementById('settings-button');
 const closeSettingsButton = document.getElementById('close-settings');
